@@ -10,8 +10,8 @@
 
 /* Define --------------------------------------------------------------------*/
 #define g			   (float)	   9.80665f
-#define DegreeToRadian (float)	   0.0174532925f  				// PI/180
-#define RadianToDegree (float)	   57.2957795f;					// 180/PI
+#define DegreeToRadian (float)	   0.0174532925f				// PI/180
+#define RadianToDegree (float)	   57.2957795f					// 180/PI
 
 
 
@@ -19,10 +19,8 @@
 /* Initialization and Configuration functions *********************************/
 void RCC_Configuration(void);
 void GPIOs_Configuration (void);
-void Timer2_Configuration(void);
-void Timer4_Configuration(void);
+//void Timer2_Configuration(void);
 void USART_Configuration(void);
-//void ADC_Configuration(void);
 
 /* Gyrometer, accelerometer and magnetometer functions ************************/
 void Gyro_Configuration(void);

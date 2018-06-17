@@ -1,27 +1,22 @@
 /* Includes ------------------------------------------------------------------*/
 #include "configuration.h"
 
-
-/**
-  * @brief Configure Clock : HSI at 8 MHz, PLL at 40 MHz
-  * @param  None
-  * @retval None
-  */
+// Configure clock : HSI at 8 MHz, PLL at 40 MHz
 void RCC_Configuration(void)
 {
-	/* Configure clock : 8MHz with HSI */
-	RCC_HSEConfig(RCC_HSE_OFF);						//Disable HSE clock
-	RCC_HSICmd(ENABLE);								//HSI on
+	// Configure clock : 8MHz with HSI
+	RCC_HSEConfig(RCC_HSE_OFF);
+	RCC_HSICmd(ENABLE);
 
-	while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY) != SET);		//Wait for HSI ready to use
+	while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY) != SET);
 
-	RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);			//Choose system clock : HSI
+	RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
 
 	uint8_t calibration = 13;
 
 	RCC_AdjustHSICalibrationValue(calibration);
 
-	/* Configure clock : 40MHz with PLL */
+	// Configure clock : 40MHz with PLL
 	RCC_PLLCmd(DISABLE);
 	while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) != RESET);
 
@@ -29,65 +24,39 @@ void RCC_Configuration(void)
 	RCC_PLLCmd(ENABLE);
 	while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) != SET);
 
-	RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);		//Choose system clock : PLL
+	RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 
 	RCC_HCLKConfig(RCC_SYSCLK_Div1);
 	RCC_PCLK2Config(RCC_HCLK_Div1);
-
-	/* Configure ADC clock */
-	RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div128);
-
-	/* Enable peripheral clock */
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_GPIOC| RCC_AHBPeriph_GPIOD| RCC_AHBPeriph_GPIOE| RCC_AHBPeriph_GPIOF | RCC_AHBPeriph_ADC12, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4 | RCC_APB1Periph_TIM2, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 }
 
-
-/**
-  * @brief Configure IOs.
-  * @param  None
-  * @retval None
-  */
 void GPIOs_Configuration (void)
 {
+	// Enable peripheral clock
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA |
+						  RCC_AHBPeriph_GPIOC |
+						  RCC_AHBPeriph_GPIOE, ENABLE);
+
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);			//Initialize structure
 
-	//LEDS
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	// LEDs
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 |
+	                             GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
 
-	//Button
+	// Button
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* Configure the GPIO control motors pins */
-	//Motors enable
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
-
-	//Motors PWM
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_Init(GPIOD, &GPIO_InitStructure);
-	GPIO_PinAFConfig(GPIOD, GPIO_PinSource12, GPIO_AF_2);
-	GPIO_PinAFConfig(GPIOD, GPIO_PinSource13, GPIO_AF_2);
-
-	/* Configure the GPIO USART1 pins */
+	// Configure the GPIO USART1 pins
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource4, GPIO_AF_7);
 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource5, GPIO_AF_7);
-
-	/* Configure the GPIO ADC pin for pressure, ultrasonic, power battery and command battery sensors */
-	//GPIO_InitStructure.GPIO_Pin = /*GPIO_Pin_0 |*/ GPIO_Pin_1 | GPIO_Pin_2 /*| GPIO_Pin_3*/;
-	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-	//GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
 
@@ -96,87 +65,50 @@ void GPIOs_Configuration (void)
   * @param  None
   * @retval None
   */
-void Timer2_Configuration(void)
-{
-	/* Configure frequency of timer 2 */
+//void Timer2_Configuration(void)
+//{
+//	/* Configure frequency of timer 2 */
+//
+//	TIM_TimeBaseInitTypeDef TIM_InitStructure;
+//	TIM_TimeBaseStructInit(&TIM_InitStructure);		//Initialize structure
+//
+//	TIM_InitStructure.TIM_Prescaler = 400-1;
+//	TIM_InitStructure.TIM_Period = 1000;
+//	TIM_InitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+//	TIM_TimeBaseInit(TIM2, &TIM_InitStructure);
+//
+//	TIM_OCInitTypeDef TIM_OCInitStructure;
+//	TIM_OCStructInit(&TIM_OCInitStructure);			//Initialize structure
+//
+//	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Timing;
+//	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+//	TIM_OCInitStructure.TIM_Pulse = 1000;
+//	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+//
+//	TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
+//
+//	/* ENABLE TIM2 Interrupt */
+//
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+//
+//	NVIC_InitTypeDef NVIC_InitStructure;
+//
+//	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitStructure);
+//
+//	TIM_Cmd(TIM2, ENABLE);
+//}
 
-	TIM_TimeBaseInitTypeDef TIM_InitStructure;
-	TIM_TimeBaseStructInit(&TIM_InitStructure);		//Initialize structure
-
-	TIM_InitStructure.TIM_Prescaler = 400-1;
-	TIM_InitStructure.TIM_Period = 1000;
-	TIM_InitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseInit(TIM2, &TIM_InitStructure);
-
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_OCStructInit(&TIM_OCInitStructure);			//Initialize structure
-
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Timing;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 1000;
-	TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-
-	TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
-
-	/* ENABLE TIM2 Interrupt */
-
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	TIM_Cmd(TIM2, ENABLE);
-}
-
-
-/**
-  * @brief Configure Timer4 : 2 PWM at 20KHz.
-  * @param  None
-  * @retval None
-  */
-void Timer4_Configuration(void)
-{
-	/* Configure frequency of timer 4 */
-	TIM_TimeBaseInitTypeDef TIM_InitStructure;
-	TIM_TimeBaseStructInit(&TIM_InitStructure);		//Initialize structure
-
-	TIM_InitStructure.TIM_Prescaler = 2-1;
-	TIM_InitStructure.TIM_Period = 1000;
-	TIM_InitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseInit(TIM4, &TIM_InitStructure);
-
-	/* Configure PWM in channel 1 and 2 */
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_OCStructInit(&TIM_OCInitStructure);			//Initialize structure
-
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;				//Alpha : 0 to TIM_Period
-	TIM_OC1Init(TIM4, &TIM_OCInitStructure);		//Channel 1
-
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;				//Alpha : 0 to TIM_Period
-	TIM_OC2Init(TIM4, &TIM_OCInitStructure);		//Channel 2
-
-	TIM_Cmd(TIM4, ENABLE);							//Enable timer 4
-}
-
-
-/**
-  * @brief Configure USART.
-  * @param  None
-  * @retval None
-  */
 void USART_Configuration(void)
 {
+	// Enable peripheral clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+
 	USART_InitTypeDef USART_InitStrucutre;
-	USART_StructInit(&USART_InitStrucutre);			//Initialize structure
+	USART_StructInit(&USART_InitStrucutre);
 
 	USART_InitStrucutre.USART_BaudRate = 115200;
 	USART_InitStrucutre.USART_WordLength = USART_WordLength_8b;
@@ -201,63 +133,6 @@ void USART_Configuration(void)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
-
-/**
-  * @brief Configure ADC.
-  * @param  None
-  * @retval None
-  */
-//void ADC_Configuration(void)
-//{
-//	uint32_t ADC_calibration = 0;
-//
-//	/* ADC1 calibration */
-//	ADC_SelectCalibrationMode(ADC1, ADC_CalibrationMode_Single);
-//	ADC_StartCalibration(ADC1);
-//	while(ADC_GetCalibrationStatus(ADC1) != RESET );
-//	ADC_calibration = ADC_GetCalibrationValue(ADC1);
-//	ADC_SetCalibrationValue(ADC1, ADC_calibration);
-//
-//
-//	ADC_InitTypeDef ADC_InitStrucutre;
-//	ADC_StructInit(&ADC_InitStrucutre);				//Initialize structure
-//
-//	ADC_InitStrucutre.ADC_ContinuousConvMode = ADC_ContinuousConvMode_Enable;
-//	ADC_InitStrucutre.ADC_Resolution = ADC_Resolution_12b;
-//	ADC_InitStrucutre.ADC_DataAlign = ADC_DataAlign_Right;
-//	ADC_InitStrucutre.ADC_NbrOfRegChannel = 2;
-//	ADC_Init(ADC1, &ADC_InitStrucutre);
-//
-//	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_181Cycles5);	//Ultrasonic sensor
-//	//ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_181Cycles5);	//Pressure sensor
-//	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 2, ADC_SampleTime_181Cycles5);	//Power battery sensor
-//	//ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 2, ADC_SampleTime_181Cycles5);	//Command battery sensor
-//
-//
-//	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
-//	ADC_ITConfig(ADC1, ADC_IT_EOS, ENABLE);
-//
-//	/* ENABLE ADC1 Interrupt */
-//	NVIC_InitTypeDef NVIC_InitStructure;
-//
-//	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitStructure);
-//
-//	ADC_Cmd(ADC1, ENABLE);
-//
-//	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_RDY) != SET);
-//	ADC_StartConversion(ADC1);
-//}
-
-
-/**
-  * @brief Configure the GYRO L3GD20.
-  * @param  None
-  * @retval None
-  */
 void Gyro_Configuration(void)
 {
 	L3GD20_InitTypeDef L3GD20_InitStructure;
@@ -281,12 +156,6 @@ void Gyro_Configuration(void)
 	L3GD20_FilterCmd(L3GD20_HIGHPASSFILTER_DISABLE);
 }
 
-
-/**
-  * @brief Configure the ACCELERO and MAGNETO LSM303DLHC.
-  * @param  None
-  * @retval None
-  */
 void Accelero_Magneto_Configuration(void)
 {
 	LSM303DLHCMag_InitTypeDef LSM303DLHCMag_InitStructure;
@@ -320,12 +189,6 @@ void Accelero_Magneto_Configuration(void)
 	LSM303DLHC_AccFilterCmd(LSM303DLHC_HighPassFilter_DISABLE);*/
 }
 
-
-/**
-  * @brief Calculate the angular Data rate.
-  * @param  pfData : Data out pointer
-  * @retval None
-  */
 void GyroReadAngRate(int16_t* pfData)
 {
 	uint8_t tmpbuffer[6] = {0};
@@ -346,12 +209,6 @@ void GyroReadAngRate(int16_t* pfData)
 	}*/
 }
 
-
-/**
-  * @brief Calculate the linear acceleration.
-  * @param pnData: Data out pointer
-  * @retval None
-  */
 void AcceleroReadAcc(int16_t* pfData)
 {
 	uint8_t tmpbuffer[6] = {0};
@@ -372,12 +229,6 @@ void AcceleroReadAcc(int16_t* pfData)
 	}*/
 }
 
-
-/**
-  * @brief Calculate the magnetic field.
-  * @param pfData: Data out pointer
-  * @retval None
-  */
 void MagnetoReadMag(float* pfData)
 {
 	uint8_t tmpbuffer[6] = {0};
@@ -397,13 +248,6 @@ void MagnetoReadMag(float* pfData)
 	pfData[2]=(float)((int16_t)((uint16_t)tmpbuffer[4] << 8) + tmpbuffer[5]) * 1.020408163f;
 }
 
-
-/**
-  * @brief Calculate the linear acceleration and the magnetic field.
-  * @param pfData_Acc: Acc data out pointer
-  * @param pfData_Mag: Mag data out pointer
-  * @retval None
-  */
 void ReadAccMag(float* pfData_Acc, float* pfData_Mag)
 {
 	uint8_t tmpbuffer[6] = {0};
