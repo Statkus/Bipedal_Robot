@@ -13,7 +13,7 @@ void Servo_Configuration(void)
 	Servo_GPIOs_Configuration();
 
 	Timer1_Configuration();
-	//Timer2_Configuration();
+	Timer2_Configuration();
 	Timer3_Configuration();
 	Timer4_Configuration();
 }
@@ -37,7 +37,8 @@ void Set_Servo_PWM(uint8_t Servo_Number, uint16_t PWM)
 			case 7: TIM3->CCR2 = PWM; break;
 			case 8: TIM3->CCR1 = PWM; break;
 			case 9: TIM1->CCR2 = PWM; break;
-			case 10: TIM1->CCR4 = PWM; break;
+			//case 10: TIM1->CCR4 = PWM; break;
+			case 10: TIM2->CCR3 = PWM; break;
 			case 11: TIM1->CCR3 = PWM; break;
 			case 12: TIM1->CCR1 = PWM; break;
 			//case 13: TIM2->CCR3 = PWM; break;
@@ -61,21 +62,21 @@ void Servo_GPIOs_Configuration (void)
 	GPIO_StructInit(&GPIO_InitStructure);
 
 	// Timer1 servos:             S12          S9           S11           S10
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 /*| GPIO_Pin_11*/;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_6);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_6);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_6);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_11);
+	//GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_11);
 
 	// Timer2 servos:             S13           S14
-	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
-	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	//GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 /*| GPIO_Pin_11*/;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_1);
 	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_1);
 
 	//// Timer2 servos:             S15          S16
@@ -135,6 +136,7 @@ void Timer1_Configuration(void)
 	TIM_OC4Init(TIM1, &TIM_OCInitStructure);
 
 	TIM_Cmd(TIM1, ENABLE);
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 }
 
 // Configure Timer2: 4 PWMs at 50Hz
