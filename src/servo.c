@@ -21,10 +21,10 @@ void Servo_Configuration(void)
 void Set_Servo_PWM(uint8_t Servo_Number, uint16_t PWM)
 {
 	if (Servo_Number >= 1 && Servo_Number <= 16) {
-		if (PWM > 2000) {
-			PWM = 2000;
-		} else if (PWM < 1000) {
-			PWM = 1000;
+		if (PWM > 2200) {
+			PWM = 2200;
+		} else if (PWM < 800) {
+			PWM = 800;
 		}
 
 		switch(Servo_Number) {
