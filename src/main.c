@@ -4,7 +4,21 @@
 #include <math.h>
 
 /* Global variables ------------------------------------------------------------------------------*/
-uint16_t Servo[12] =  {1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500};
+uint8_t Servo_Raw_Buffer[24] = {0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05,
+                                0xDC, 0x05};
+uint8_t New_CRC = 0;
+uint8_t New_Data = 0;
+
 
 int main(void)
 {
@@ -69,8 +83,20 @@ int main(void)
 			break;
 		}
 
-		for(i = 0; i < 12; i++) {
-			Set_Servo_PWM(i + 1, Servo[i]);
+		if(New_Data == 1) {
+			New_Data = 0;
+
+			uint8_t Computed_CRC = 0;
+			for(i = 0; i < 24; i++) {
+				Computed_CRC = Computed_CRC ^ Servo_Raw_Buffer[i];
+			}
+
+			if(Computed_CRC == New_CRC) {
+				for(i = 0; i < 12; i++) {
+					uint16_t PWM = (uint16_t)(Servo_Raw_Buffer[i * 2]) + ((uint16_t)(Servo_Raw_Buffer[(i * 2) + 1]) << 8);
+					Set_Servo_PWM(i + 1, PWM);
+				}
+			}
 		}
 
 		for(i = 0; i < 30000; i++);
@@ -117,13 +143,16 @@ void USART1_IRQHandler(void)
 			}
 			break;
 
+		case 26:
+			New_CRC = RX_Buffer;
+			New_Data = 1;
+			RX_Counter = 0;
+			break;
+
 		default:
-			if(RX_Counter > 1 && RX_Counter < 13) {
-				Servo[RX_Counter - 2] = (RX_Buffer * 4) + 990;
+			if(RX_Counter > 1 && RX_Counter < 26) {
+				Servo_Raw_Buffer[RX_Counter - 2] = RX_Buffer;
 				RX_Counter++;
-			} else if(RX_Counter == 13) {
-				Servo[RX_Counter - 2] = (RX_Buffer * 4) + 990;
-				RX_Counter = 0;
 			} else {
 				RX_Counter = 0;
 			}
