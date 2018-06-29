@@ -64,10 +64,30 @@ def send_values(self):
 
     bytes_to_send[26] = int(CRC)
 
-    print (bytes_to_send)
+    print(bytes_to_send)
     ser.write(bytes_to_send)
 
+def set_from_text():
+    string_values = e.get()
 
+    string_values = string_values.replace("[", "")
+    string_values = string_values.replace("]", "")
+    string_values = string_values.replace(" ", "")
+
+    values_list = [int(e) if e.isdigit() else e for e in string_values.split(',')]
+
+    s1.set(values_list[0])
+    s2.set(values_list[1])
+    s3.set(values_list[2])
+    s4.set(values_list[3])
+    s5.set(values_list[4])
+    s6.set(values_list[5])
+    s7.set(values_list[6])
+    s8.set(values_list[7])
+    s9.set(values_list[8])
+    s10.set(values_list[9])
+    s11.set(values_list[10])
+    s12.set(values_list[11])
 
 ser = serial.Serial('/dev/ttyUSB0', 115200)
 
@@ -157,6 +177,12 @@ servo_name.pack()
 s12 = tk.Scale(root, from_=-500, to=500, length=600, orient=tk.HORIZONTAL, command=send_values)
 s12.set(0)
 s12.pack()
+
+e = tk.Entry(root)
+e.pack()
+
+b = tk.Button(root, text="Write value", width=20, command=set_from_text)
+b.pack()
 
 tk.mainloop()
 
